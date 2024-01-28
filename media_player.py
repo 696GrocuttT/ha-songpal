@@ -120,6 +120,7 @@ class SongpalEntity(MediaPlayerEntity):
         self._attr_is_volume_muted = False
 
         self._active_source = None
+        self._content_uri = None
         self._sources = {}
 
     async def async_added_to_hass(self) -> None:
@@ -142,12 +143,13 @@ class SongpalEntity(MediaPlayerEntity):
 
         async def _source_changed(content: ContentChange):
             _LOGGER.debug("Source changed: %s", content)
+            self._content_uri = content.uri
             if content.is_input:
                 self._active_source = self._sources[content.uri]
                 _LOGGER.debug("New active source: %s", self._active_source)
-                self.async_write_ha_state()
             else:
                 _LOGGER.debug("Got non-handled content change: %s", content)
+            self.async_write_ha_state()
 
         async def _power_changed(power: PowerChange):
             _LOGGER.debug("Power changed: %s", power)
@@ -264,6 +266,7 @@ class SongpalEntity(MediaPlayerEntity):
             for input_ in inputs:
                 self._sources[input_.uri] = input_
                 if input_.active:
+                    self._content_uri = input_.uri
                     self._active_source = input_
 
             _LOGGER.debug("Active source: %s", self._active_source)
@@ -294,6 +297,11 @@ class SongpalEntity(MediaPlayerEntity):
         if self._state:
             return MediaPlayerState.ON
         return MediaPlayerState.OFF
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Attributes of the media player."""
+        return {"contentUri": self._content_uri}
 
     @property
     def source(self):
