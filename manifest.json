@@ -1,6 +1,7 @@
 {
   "domain": "songpal",
   "name": "Sony Songpal",
+  "version": "0.1",
   "codeowners": ["@rytilahti", "@shenxn"],
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/songpal",
